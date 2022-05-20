@@ -13,7 +13,7 @@ class BrregClient(private val httpClient: HttpClient, private val brregUrl: Stri
     fun getVirksomhetsNavn(orgnr: String): String {
         return try {
             val (navn) = runBlocking {
-                httpClient.get<UnderenheterNavnResponse>(brregUrl + orgnr)
+                httpClient.get<UnderenheterResponse>(brregUrl + orgnr)
             }
             log.info("Fant virksomheten")
             navn
