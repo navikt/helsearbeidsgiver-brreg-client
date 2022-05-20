@@ -1,20 +1,29 @@
 package no.nav.helsearbeidsgiver.brreg
 
+import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
-import no.nav.helsearbeidsgiver.norg2.buildHttpClientJson
+import io.ktor.http.headersOf
+import no.nav.helsearbeidsgiver.norg2.buildClient
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-
-import org.junit.jupiter.api.Assertions.*
 
 internal class BrregClientTest {
 
+    val successResponse = "response.json".loadFromResources()
+    val orgNr = "123456789"
+
     @Test
     fun `Skal finne virksomhetsnavn`() {
-        BrregClient(buildHttpClientJson(HttpStatusCode.Accepted, ""), "").getVirksomhetsNavn("abd")
+        buildClient(successResponse, HttpStatusCode.Accepted).getVirksomhetsNavn(orgNr)
     }
 
     @Test
+    @Disabled
     fun `Skal håndtere feil`() {
-        BrregClient(buildHttpClientJson(HttpStatusCode.InternalServerError, ""), "").getVirksomhetsNavn("abd")
+        buildClient("", HttpStatusCode.ServiceUnavailable, headersOf(HttpHeaders.ContentType, "plain/text")).getVirksomhetsNavn(orgNr)
     }
+}
+
+fun String.loadFromResources(): String {
+    return ClassLoader.getSystemResource(this).readText()
 }

@@ -1,10 +1,10 @@
 rootProject.name = "brreg-client"
 
 pluginManagement {
-    val jvmVersion: String by settings
+    val kotlinVersion: String by settings
     plugins {
-        kotlin("jvm") version jvmVersion
-        kotlin("plugin.serialization") version jvmVersion
+        kotlin("jvm") version kotlinVersion
+        kotlin("plugin.serialization") version kotlinVersion
         id("org.jmailen.kotlinter")
         id("maven-publish")
     }
