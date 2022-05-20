@@ -7,7 +7,7 @@ import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 
 class BrregClient(private val httpClient: HttpClient, private val brregUrl: String) {
-    private val log = LoggerFactory.getLogger(BrregClient::class.java)
+    private val log = LoggerFactory.getLogger(this.javaClass.name)
 
     fun getVirksomhetsNavn(orgnr: String): String {
         return try {
