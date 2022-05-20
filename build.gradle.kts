@@ -65,8 +65,8 @@ dependencies {
     implementation("io.ktor:ktor-client-json:$ktorVersion")
     implementation("io.ktor:ktor-client-serialization:$ktorVersion")
     testImplementation("io.ktor:ktor-client-mock:$ktorVersion")
-    implementation("com.nimbusds:nimbus-jose-jwt:9.+")
-    implementation("no.nav.helsearbeidsgiver:helsearbeidsgiver-tokenprovider:0.+")
+    implementation("com.nimbusds:nimbus-jose-jwt:9.22")
+    implementation("no.nav.helsearbeidsgiver:tokenprovider:0.1.3")
     testImplementation("io.mockk:mockk:$mockkVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.2.0")
 }
