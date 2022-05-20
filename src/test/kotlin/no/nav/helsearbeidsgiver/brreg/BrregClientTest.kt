@@ -3,7 +3,6 @@ package no.nav.helsearbeidsgiver.brreg
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
-import no.nav.helsearbeidsgiver.norg2.buildClient
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 

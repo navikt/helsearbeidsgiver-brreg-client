@@ -1,4 +1,4 @@
-package no.nav.helsearbeidsgiver.norg2
+package no.nav.helsearbeidsgiver.brreg
 
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
@@ -11,26 +11,27 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import io.ktor.utils.io.ByteReadChannel
 import kotlinx.serialization.json.Json
-import no.nav.helsearbeidsgiver.brreg.BrregClient
 
 fun buildClient(
     response: String,
     status: HttpStatusCode = HttpStatusCode.OK,
     headers: Headers = headersOf(HttpHeaders.ContentType, "application/json")
-    ): BrregClient {
+): BrregClient {
     return BrregClient(
-        HttpClient(MockEngine {
-            respond(
-                content = ByteReadChannel(response),
-                status = status,
-                headers = headers
-            )
-        }) {
+        HttpClient(
+            MockEngine {
+                respond(
+                    content = ByteReadChannel(response),
+                    status = status,
+                    headers = headers
+                )
+            }
+        ) {
             install(JsonFeature) {
                 serializer = KotlinxSerializer(
                     Json {
                         ignoreUnknownKeys = true
-                        //explicitNulls = false
+                        // explicitNulls = false
                     }
                 )
             }
