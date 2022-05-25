@@ -10,7 +10,17 @@ plugins {
     kotlin("jvm")
     kotlin("plugin.serialization")
     id("org.jmailen.kotlinter") version "3.10.0"
+    id("org.sonarqube") version "2.8"    
     id("maven-publish")
+}
+
+sonarqube {
+    properties {
+        property("sonar.projectKey", "navikt_helsearbeidsgiver-brreg-client")
+        property("sonar.organization", "navikt")
+        property("sonar.host.url", "https://sonarcloud.io")
+        property("sonar.login", System.getenv("SONAR_TOKEN"))
+    }
 }
 
 group = "no.nav.helsearbeidsgiver"
