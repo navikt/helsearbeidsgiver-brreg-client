@@ -10,7 +10,7 @@ plugins {
     kotlin("jvm")
     kotlin("plugin.serialization")
     id("org.jmailen.kotlinter") version "3.10.0"
-    id("org.sonarqube") version "2.8"    
+    id("org.sonarqube") version "2.8"
     id("maven-publish")
 }
 
