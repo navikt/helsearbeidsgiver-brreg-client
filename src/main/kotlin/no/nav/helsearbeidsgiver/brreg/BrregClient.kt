@@ -1,32 +1,37 @@
 package no.nav.helsearbeidsgiver.brreg
 
 import io.ktor.client.HttpClient
-import io.ktor.client.features.ClientRequestException
-import io.ktor.client.features.ServerResponseException
+import io.ktor.client.call.body
+import io.ktor.client.plugins.ClientRequestException
+import io.ktor.client.plugins.expectSuccess
 import io.ktor.client.request.get
+import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.runBlocking
-import org.slf4j.LoggerFactory
+import no.nav.helsearbeidsgiver.utils.log.logger
 
-class BrregClient(private val httpClient: HttpClient, private val brregUrl: String) {
-    private val log = LoggerFactory.getLogger(this.javaClass.name)
+class BrregClient(
+    private val brregUrl: String,
+    private val httpClient: HttpClient
+) {
+    private val logger = this.logger()
 
-    fun getVirksomhetsNavn(orgnr: String): String {
-        return try {
-            val (navn) = runBlocking {
-                httpClient.get<UnderenheterResponse>(brregUrl + orgnr)
+    fun getVirksomhetsNavn(orgnr: String): String =
+        try {
+            runBlocking {
+                httpClient.get(brregUrl + orgnr) {
+                    expectSuccess = true
+                }
+                    .body<UnderenheterResponse>()
+                    .navn
             }
-            log.info("Fant virksomheten")
-            navn
-        } catch (cause2: ServerResponseException) {
-            throw cause2
-        } catch (cause: ClientRequestException) {
-            if (404 == cause.response.status.value) {
-                log.error("Fant ikke virksomhet i brreg")
+                .also { logger.info("Fant virksomheten.") }
+        } catch (e: ClientRequestException) {
+            if (e.response.status == HttpStatusCode.NotFound) {
                 "Arbeidsgiver"
+                    .also { logger.error("Fant ikke virksomhet i brreg, bruker default navn '$it'.") }
             } else {
-                log.error("Klarte ikke å hente virksomhet!", cause)
-                throw cause
+                logger.error("Klarte ikke å hente virksomhet!", e)
+                throw e
             }
         }
-    }
 }
