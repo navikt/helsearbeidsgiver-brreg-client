@@ -1,3 +1,5 @@
+rootProject.name = "brreg-client"
+
 pluginManagement {
     val kotlinVersion: String by settings
     val kotlinterVersion: String by settings
