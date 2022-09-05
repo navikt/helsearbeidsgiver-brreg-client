@@ -19,6 +19,10 @@ tasks {
     }
 }
 
+java {
+    withSourcesJar()
+}
+
 repositories {
     mavenCentral()
     mavenNav("*")
