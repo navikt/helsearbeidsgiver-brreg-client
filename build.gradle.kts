@@ -31,7 +31,7 @@ publishing {
         }
     }
     repositories {
-        mavenNav("helsearbeidsgiver-brreg-client")
+        mavenNav("helsearbeidsgiver-${rootProject.name}")
     }
 }
 
