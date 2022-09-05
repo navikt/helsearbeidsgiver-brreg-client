@@ -12,7 +12,7 @@ plugins {
 
 tasks {
     withType<KotlinCompile> {
-        kotlinOptions.jvmTarget = "11"
+        kotlinOptions.jvmTarget = "17"
     }
     test {
         useJUnitPlatform()
@@ -37,7 +37,6 @@ publishing {
 
 dependencies {
     val coroutinesVersion: String by project
-    val junitJupiterVersion: String by project
     val kotestVersion: String by project
     val kotlinSerializationVersion: String by project
     val ktorVersion: String by project
