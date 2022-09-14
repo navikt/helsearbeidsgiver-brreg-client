@@ -34,5 +34,5 @@ class BrregClientTest : StringSpec({
     }
 })
 
-fun String.loadFromResources(): String =
+private fun String.loadFromResources(): String =
     ClassLoader.getSystemResource(this).readText()
