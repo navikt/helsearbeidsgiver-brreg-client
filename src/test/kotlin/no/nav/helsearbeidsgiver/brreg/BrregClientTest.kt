@@ -11,16 +11,16 @@ const val ORG_NR = "123456789"
 class BrregClientTest : StringSpec({
 
     "skal finne virksomhetsnavn" {
-        val successResponse = "response.json".loadFromResources()
+        val successResponse = "response.json".readResource()
 
-        val navn = mockClient(successResponse, HttpStatusCode.Accepted)
+        val navn = mockBrregClient(successResponse, HttpStatusCode.Accepted)
             .getVirksomhetsNavn(ORG_NR)
 
         navn shouldBeEqualComparingTo "Firma AS"
     }
 
     "skal bruke default navn dersom organisasjon ikke finnes" {
-        val navn = mockClient("", HttpStatusCode.NotFound)
+        val navn = mockBrregClient("", HttpStatusCode.NotFound)
             .getVirksomhetsNavn(ORG_NR)
 
         navn shouldBeEqualComparingTo "Arbeidsgiver"
@@ -28,11 +28,11 @@ class BrregClientTest : StringSpec({
 
     "skal feile ved 4xx-feil utenom 404" {
         shouldThrowExactly<ClientRequestException> {
-            mockClient("", HttpStatusCode.BadRequest)
+            mockBrregClient("", HttpStatusCode.BadRequest)
                 .getVirksomhetsNavn(ORG_NR)
         }
     }
 })
 
-private fun String.loadFromResources(): String =
+private fun String.readResource(): String =
     ClassLoader.getSystemResource(this).readText()

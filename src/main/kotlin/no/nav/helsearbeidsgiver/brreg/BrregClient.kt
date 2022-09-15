@@ -1,26 +1,24 @@
 package no.nav.helsearbeidsgiver.brreg
 
-import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ClientRequestException
-import io.ktor.client.plugins.expectSuccess
 import io.ktor.client.request.get
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.Serializable
 import no.nav.helsearbeidsgiver.utils.log.logger
 
 class BrregClient(
-    private val brregUrl: String,
-    private val httpClient: HttpClient
+    private val baseUrl: String
 ) {
     private val logger = this.logger()
+
+    private val httpClient = createHttpClient()
 
     fun getVirksomhetsNavn(orgnr: String): String =
         try {
             runBlocking {
-                httpClient.get(brregUrl + orgnr) {
-                    expectSuccess = true
-                }
+                httpClient.get(baseUrl + orgnr)
                     .body<UnderenheterResponse>()
                     .navn
             }
@@ -35,3 +33,8 @@ class BrregClient(
             }
         }
 }
+
+@Serializable
+internal data class UnderenheterResponse(
+    val navn: String
+)
