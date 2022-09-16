@@ -40,7 +40,6 @@ publishing {
 }
 
 dependencies {
-    val coroutinesVersion: String by project
     val kotestVersion: String by project
     val kotlinSerializationVersion: String by project
     val ktorVersion: String by project
@@ -53,7 +52,6 @@ dependencies {
     implementation("io.ktor:ktor-client-okhttp:$ktorVersion")
     implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
     implementation("no.nav.helsearbeidsgiver:utils:$utilsVersion")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinSerializationVersion")
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
 

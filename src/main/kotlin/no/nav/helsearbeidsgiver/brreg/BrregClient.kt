@@ -4,24 +4,21 @@ import io.ktor.client.call.body
 import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.request.get
 import io.ktor.http.HttpStatusCode
-import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
 import no.nav.helsearbeidsgiver.utils.log.logger
 
 class BrregClient(
-    private val baseUrl: String
+    private val url: String
 ) {
     private val logger = this.logger()
 
     private val httpClient = createHttpClient()
 
-    fun getVirksomhetsNavn(orgnr: String): String =
+    suspend fun hentVirksomhetNavn(orgnr: String): String =
         try {
-            runBlocking {
-                httpClient.get(baseUrl + orgnr)
-                    .body<UnderenheterResponse>()
-                    .navn
-            }
+            httpClient.get(url + orgnr)
+                .body<UnderenheterResponse>()
+                .navn
                 .also { logger.info("Fant virksomheten.") }
         } catch (e: ClientRequestException) {
             if (e.response.status == HttpStatusCode.NotFound) {

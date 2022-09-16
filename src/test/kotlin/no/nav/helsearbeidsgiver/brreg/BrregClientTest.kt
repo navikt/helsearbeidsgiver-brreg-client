@@ -14,14 +14,14 @@ class BrregClientTest : StringSpec({
         val successResponse = "response.json".readResource()
 
         val navn = mockBrregClient(successResponse, HttpStatusCode.Accepted)
-            .getVirksomhetsNavn(ORG_NR)
+            .hentVirksomhetNavn(ORG_NR)
 
         navn shouldBeEqualComparingTo "Firma AS"
     }
 
     "skal bruke default navn dersom organisasjon ikke finnes" {
         val navn = mockBrregClient("", HttpStatusCode.NotFound)
-            .getVirksomhetsNavn(ORG_NR)
+            .hentVirksomhetNavn(ORG_NR)
 
         navn shouldBeEqualComparingTo "Arbeidsgiver"
     }
@@ -29,7 +29,7 @@ class BrregClientTest : StringSpec({
     "skal feile ved 4xx-feil utenom 404" {
         shouldThrowExactly<ClientRequestException> {
             mockBrregClient("", HttpStatusCode.BadRequest)
-                .getVirksomhetsNavn(ORG_NR)
+                .hentVirksomhetNavn(ORG_NR)
         }
     }
 })
