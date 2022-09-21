@@ -13,8 +13,8 @@ import io.mockk.unmockkStatic
 import kotlin.reflect.KFunction
 
 fun mockBrregClient(
-    content: String,
-    status: HttpStatusCode
+    status: HttpStatusCode,
+    content: String = ""
 ): BrregClient {
     val mockEngine = MockEngine {
         respond(

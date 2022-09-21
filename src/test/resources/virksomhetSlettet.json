@@ -1,0 +1,22 @@
+{
+  "organisasjonsnummer": "123456789",
+  "navn": "Slettet Firma AS",
+  "organisasjonsform": {
+    "kode": "BEDR",
+    "beskrivelse": "Underenhet til næringsdrivende og offentlig forvaltning",
+    "_links": {
+      "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/BEDR"
+      }
+    }
+  },
+  "slettedato": "2022-02-22",
+  "_links": {
+    "self": {
+      "href": "https://data.brreg.no/enhetsregisteret/api/underenheter/123456789"
+    },
+    "overordnetEnhet": {
+      "href": "https://data.brreg.no/enhetsregisteret/api/enheter/000000000"
+    }
+  }
+}
