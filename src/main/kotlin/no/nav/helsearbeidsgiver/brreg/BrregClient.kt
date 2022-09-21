@@ -17,9 +17,12 @@ class BrregClient(
     private val httpClient = createHttpClient()
     private val correctedUrl = url.trimEnd('/') + "/"
 
-    suspend fun hentVirksomhetNavn(orgnr: String): String =
+    suspend fun hentVirksomhetNavn(orgnr: String): String? =
         hentVirksomhet(orgnr)
             ?.navn
+
+    suspend fun hentVirksomhetNavnOrDefault(orgnr: String): String =
+        hentVirksomhetNavn(orgnr)
             ?: VIRKSOMHET_NAVN_DEFAULT.also {
                 logger.error("Fant ikke virksomhet i brreg, bruker default navn '$it'.")
             }
