@@ -12,13 +12,13 @@ import no.nav.helsearbeidsgiver.utils.test.mock.mockStatic
 
 fun mockBrregClient(
     status: HttpStatusCode,
-    content: String = ""
+    content: String = "",
 ): BrregClient {
     val mockEngine = MockEngine {
         respond(
             content = content,
             status = status,
-            headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+            headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString()),
         )
     }
 
