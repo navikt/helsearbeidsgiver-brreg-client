@@ -8,9 +8,7 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import io.mockk.every
-import io.mockk.mockkStatic
-import io.mockk.unmockkStatic
-import kotlin.reflect.KFunction
+import no.nav.helsearbeidsgiver.utils.test.mock.mockStatic
 
 fun mockBrregClient(
     status: HttpStatusCode,
@@ -26,17 +24,8 @@ fun mockBrregClient(
 
     val mockHttpClient = HttpClient(mockEngine) { customize() }
 
-    return mockFn(::createHttpClient) {
+    return mockStatic(::createHttpClient) {
         every { createHttpClient() } returns mockHttpClient
         BrregClient("url")
-    }
-}
-
-private fun <T> mockFn(fn: KFunction<*>, block: () -> T): T {
-    mockkStatic(fn)
-    return try {
-        block()
-    } finally {
-        unmockkStatic(fn)
     }
 }
