@@ -10,6 +10,7 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.plugins.ServerResponseException
 import io.ktor.http.HttpStatusCode
+import no.nav.helsearbeidsgiver.utils.test.resource.readResource
 
 private const val ORG_NR = "123456789"
 
@@ -89,6 +90,3 @@ class BrregClientTest : StringSpec({
             }
         }
 })
-
-private fun String.readResource(): String =
-    ClassLoader.getSystemResource(this).readText()
