@@ -67,14 +67,14 @@ class BrregClientTest : StringSpec({
     listOf(
         BrregClient::hentVirksomhetNavn,
         BrregClient::hentVirksomhetNavnOrDefault,
-        BrregClient::erVirksomhet
+        BrregClient::erVirksomhet,
     )
         .forEach { testFn ->
             "${testFn.name} skal feile ved 4xx-feil utenom 404" {
                 shouldThrowExactly<ClientRequestException> {
                     testFn(
                         mockBrregClient(HttpStatusCode.BadRequest),
-                        ORG_NR
+                        ORG_NR,
                     )
                 }
             }
@@ -83,7 +83,7 @@ class BrregClientTest : StringSpec({
                 shouldThrowExactly<ServerResponseException> {
                     testFn(
                         mockBrregClient(HttpStatusCode.InternalServerError),
-                        ORG_NR
+                        ORG_NR,
                     )
                 }
             }

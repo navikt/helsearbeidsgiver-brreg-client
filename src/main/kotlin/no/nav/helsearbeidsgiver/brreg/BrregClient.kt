@@ -10,7 +10,7 @@ import no.nav.helsearbeidsgiver.utils.log.logger
 internal const val VIRKSOMHET_NAVN_DEFAULT = "Ukjent arbeidsgiver"
 
 class BrregClient(
-    url: String
+    url: String,
 ) {
     private val logger = this.logger()
 
@@ -39,13 +39,16 @@ class BrregClient(
             httpClient.get(correctedUrl + orgnr)
                 .body<Virksomhet>()
         } catch (e: ClientRequestException) {
-            if (e.response.status == HttpStatusCode.NotFound) null
-            else throw e
+            if (e.response.status == HttpStatusCode.NotFound) {
+                null
+            } else {
+                throw e
+            }
         }
 }
 
 @Serializable
 internal data class Virksomhet(
     val navn: String,
-    val slettedato: String? = null
+    val slettedato: String? = null,
 )
