@@ -7,6 +7,7 @@ import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.comparables.shouldBeEqualComparingTo
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.plugins.ServerResponseException
 import io.ktor.http.HttpStatusCode
@@ -17,6 +18,7 @@ private const val ORG_NR = "123456789"
 private val virksomhetMedNavnJson = "virksomhetMedNavn.json".readResource()
 private val virksomhetSlettetJson = "virksomhetSlettet.json".readResource()
 private val virksomhetIkkeFunnetJson = "ingenTreff.json".readResource()
+private val flereTreffJson = "flereTreff.json".readResource()
 
 class BrregClientTest : StringSpec({
 
@@ -76,6 +78,15 @@ class BrregClientTest : StringSpec({
         mockBrregClient(HttpStatusCode.NotFound)
             .erVirksomhet(ORG_NR)
             .shouldBeFalse()
+    }
+
+    "hent flere virksomheter" {
+        val parametere = listOf("123456789", "012345678", "987654321")
+        val virksomheter = mockBrregClient(HttpStatusCode.OK, flereTreffJson).hentVirksomheter(parametere)
+        parametere.forEachIndexed { i, parameter ->
+            parameter shouldBe virksomheter[i]?.organisasjonsnummer
+            "Firma $i" shouldBe virksomheter[i]?.navn
+        }
     }
 
     listOf(
