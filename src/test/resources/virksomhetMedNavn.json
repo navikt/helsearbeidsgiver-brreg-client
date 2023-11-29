@@ -1,41 +1,58 @@
 {
-  "organisasjonsnummer": "123456789",
-  "navn": "Firma AS",
-  "organisasjonsform": {
-    "kode": "BEDR",
-    "beskrivelse": "Underenhet til næringsdrivende og offentlig forvaltning",
-    "_links": {
-      "self": {
-        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/BEDR"
+  "_embedded": {
+    "underenheter": [
+    {
+      "organisasjonsnummer": "123456789",
+      "navn": "Firma AS",
+      "organisasjonsform": {
+        "kode": "BEDR",
+        "beskrivelse": "Underenhet til næringsdrivende og offentlig forvaltning",
+        "_links": {
+          "self": {
+            "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/BEDR"
+          }
+        }
+      },
+      "registreringsdatoEnhetsregisteret": "2020-01-23",
+      "registrertIMvaregisteret": false,
+      "naeringskode1": {
+        "beskrivelse": "Annen undervisning ikke nevnt annet sted",
+        "kode": "85.599"
+      },
+      "antallAnsatte": 0,
+      "overordnetEnhet": "000000000",
+      "oppstartsdato": "2020-01-11",
+      "beliggenhetsadresse": {
+        "land": "Norge",
+        "landkode": "NO",
+        "postnummer": "1234",
+        "poststed": "Ingensteder",
+        "adresse": [
+          "Gateveien 12"
+        ],
+        "kommune": "Ingenmune",
+        "kommunenummer": "1234"
+      },
+      "_links": {
+        "self": {
+          "href": "https://data.brreg.no/enhetsregisteret/api/underenheter/123456789"
+        },
+        "overordnetEnhet": {
+          "href": "https://data.brreg.no/enhetsregisteret/api/enheter/000000000"
+        }
       }
     }
-  },
-  "registreringsdatoEnhetsregisteret": "2020-01-23",
-  "registrertIMvaregisteret": false,
-  "naeringskode1": {
-    "beskrivelse": "Annen undervisning ikke nevnt annet sted",
-    "kode": "85.599"
-  },
-  "antallAnsatte": 0,
-  "overordnetEnhet": "000000000",
-  "oppstartsdato": "2020-01-11",
-  "beliggenhetsadresse": {
-    "land": "Norge",
-    "landkode": "NO",
-    "postnummer": "1234",
-    "poststed": "Ingensteder",
-    "adresse": [
-      "Gateveien 12"
-    ],
-    "kommune": "Ingenmune",
-    "kommunenummer": "1234"
+    ]
   },
   "_links": {
     "self": {
-      "href": "https://data.brreg.no/enhetsregisteret/api/underenheter/123456789"
-    },
-    "overordnetEnhet": {
-      "href": "https://data.brreg.no/enhetsregisteret/api/enheter/000000000"
+      "href": "https://data.brreg.no/enhetsregisteret/api/underenheter?organisasjonsnummer=123456789"
     }
+  },
+  "page": {
+    "size": 20,
+    "totalElements": 1,
+    "totalPages": 1,
+    "number": 0
   }
 }

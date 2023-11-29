@@ -16,6 +16,7 @@ private const val ORG_NR = "123456789"
 
 private val virksomhetMedNavnJson = "virksomhetMedNavn.json".readResource()
 private val virksomhetSlettetJson = "virksomhetSlettet.json".readResource()
+private val virksomhetIkkeFunnetJson = "ingenTreff.json".readResource()
 
 class BrregClientTest : StringSpec({
 
@@ -27,7 +28,7 @@ class BrregClientTest : StringSpec({
         navn shouldBeEqualComparingTo "Firma AS"
     }
 
-    "${BrregClient::hentVirksomhetNavn.name} skal gi 'null' dersom virksomhet ikke finnes" {
+    "${BrregClient::hentVirksomhetNavn.name} skal gi 'null' dersom vi mottar 'Not found' http-kode" {
         mockBrregClient(HttpStatusCode.NotFound)
             .hentVirksomhetNavn(ORG_NR)
             .shouldBeNull()
@@ -40,11 +41,23 @@ class BrregClientTest : StringSpec({
         navn shouldBeEqualComparingTo "Firma AS"
     }
 
-    "${BrregClient::hentVirksomhetNavnOrDefault.name} skal gi default navn dersom virksomhet ikke finnes" {
+    "${BrregClient::hentVirksomhetNavnOrDefault.name} skal gi default navn dersom vi mottar 'Not found' http-kode" {
         val navn = mockBrregClient(HttpStatusCode.NotFound)
             .hentVirksomhetNavnOrDefault(ORG_NR)
 
         navn shouldBeEqualComparingTo VIRKSOMHET_NAVN_DEFAULT
+    }
+
+    "${BrregClient::hentVirksomhetNavn.name} skal gi default navn dersom virksomhet ikke finnes" {
+        val navn = mockBrregClient(HttpStatusCode.OK, virksomhetIkkeFunnetJson)
+            .hentVirksomhetNavnOrDefault(ORG_NR)
+        navn shouldBeEqualComparingTo VIRKSOMHET_NAVN_DEFAULT
+    }
+
+    "${BrregClient::hentVirksomhetNavn.name} skal gi 'null' dersom virksomhet ikke finnes" {
+        mockBrregClient(HttpStatusCode.OK, virksomhetIkkeFunnetJson)
+            .hentVirksomhetNavn(ORG_NR)
+            .shouldBeNull()
     }
 
     "funnet virksomhet uten slettedato bekrefter eksistens" {
