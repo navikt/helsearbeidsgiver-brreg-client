@@ -17,7 +17,7 @@ class BrregClient(
     private val httpClient = createHttpClient()
     private val correctedUrl = url.trimEnd('/') + "?size=100&"
 
-    suspend fun hentVirksomheter(orgnr: List<String>): List<Virksomhet?> {
+    suspend fun hentVirksomheter(orgnr: List<String>): List<Virksomhet> {
         return hentVirksomhet(orgnr.joinToString(separator = ","))
     }
 
@@ -33,11 +33,11 @@ class BrregClient(
 
     suspend fun erVirksomhet(orgnr: String): Boolean =
         hentVirksomhet(orgnr)
-            .let {
-                return it.isNotEmpty() && it.firstOrNull()?.slettedato.isNullOrEmpty()
-            }
+            .firstOrNull()
+            ?.let { it.slettedato.isNullOrEmpty() }
+            ?: false
 
-    private suspend fun hentVirksomhet(orgnr: String): List<Virksomhet?> =
+    private suspend fun hentVirksomhet(orgnr: String): List<Virksomhet> =
         try {
             httpClient.get(correctedUrl + "organisasjonsnummer=$orgnr")
                 .body<Payload>()._embedded?.underenheter.orEmpty()
