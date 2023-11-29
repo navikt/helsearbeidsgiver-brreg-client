@@ -18,8 +18,7 @@ class BrregClient(
     private val correctedUrl = url.trimEnd('/') + "?size=100&"
 
     suspend fun hentVirksomheter(orgnr: List<String>): List<Virksomhet?> {
-        val parameter = orgnr.tilParameter()
-        return hentVirksomhet(parameter)
+        return hentVirksomhet(orgnr.joinToString(separator = ","))
     }
 
     suspend fun hentVirksomhetNavn(orgnr: String): String? =
@@ -37,10 +36,6 @@ class BrregClient(
             .let {
                 return it.isNotEmpty() && it.firstOrNull()?.slettedato.isNullOrEmpty()
             }
-
-    private fun <T> List<T>.tilParameter(): String {
-        return joinToString(separator = ",")
-    }
 
     private suspend fun hentVirksomhet(orgnr: String): List<Virksomhet?> =
         try {
