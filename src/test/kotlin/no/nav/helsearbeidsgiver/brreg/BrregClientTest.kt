@@ -30,6 +30,7 @@ class BrregClientTest : StringSpec({
         navn shouldBeEqualComparingTo "Firma AS"
     }
 
+    //Skal ikke få 404 ved bruk av nytt kall, men beholder foreløpig
     "${BrregClient::hentVirksomhetNavn.name} skal gi 'null' dersom vi mottar 'Not found' http-kode" {
         mockBrregClient(HttpStatusCode.NotFound)
             .hentVirksomhetNavn(ORG_NR)
@@ -43,6 +44,7 @@ class BrregClientTest : StringSpec({
         navn shouldBeEqualComparingTo "Firma AS"
     }
 
+    //Skal ikke få 404 ved bruk av nytt kall, men beholder foreløpig
     "${BrregClient::hentVirksomhetNavnOrDefault.name} skal gi default navn dersom vi mottar 'Not found' http-kode" {
         val navn = mockBrregClient(HttpStatusCode.NotFound)
             .hentVirksomhetNavnOrDefault(ORG_NR)
@@ -74,6 +76,7 @@ class BrregClientTest : StringSpec({
             .shouldBeFalse()
     }
 
+    //Skal ikke få 404 ved bruk av nytt kall, men beholder foreløpig
     "ikke funnet virksomhet avkrefter eksistens" {
         mockBrregClient(HttpStatusCode.NotFound)
             .erVirksomhet(ORG_NR)
@@ -84,8 +87,8 @@ class BrregClientTest : StringSpec({
         val parametere = listOf("123456789", "012345678", "987654321")
         val virksomheter = mockBrregClient(HttpStatusCode.OK, flereTreffJson).hentVirksomheter(parametere)
         parametere.forEachIndexed { i, parameter ->
-            parameter shouldBe virksomheter[i]?.organisasjonsnummer
-            "Firma $i" shouldBe virksomheter[i]?.navn
+            parameter shouldBe virksomheter[i].organisasjonsnummer
+            "Firma $i" shouldBe virksomheter[i].navn
         }
     }
 
