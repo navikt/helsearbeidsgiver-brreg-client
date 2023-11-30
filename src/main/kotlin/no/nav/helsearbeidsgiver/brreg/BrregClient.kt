@@ -15,10 +15,14 @@ class BrregClient(
     private val logger = this.logger()
 
     private val httpClient = createHttpClient()
-    private val correctedUrl = url.trimEnd('/') + "/"
+    private val correctedUrl = url.trimEnd('/') + "?size=100&"
+
+    suspend fun hentVirksomheter(orgnr: List<String>): List<Virksomhet> {
+        return hentVirksomhet(orgnr.joinToString(separator = ","))
+    }
 
     suspend fun hentVirksomhetNavn(orgnr: String): String? =
-        hentVirksomhet(orgnr)
+        hentVirksomhet(orgnr).firstOrNull()
             ?.navn
 
     suspend fun hentVirksomhetNavnOrDefault(orgnr: String): String =
@@ -29,18 +33,17 @@ class BrregClient(
 
     suspend fun erVirksomhet(orgnr: String): Boolean =
         hentVirksomhet(orgnr)
-            ?.let {
-                it.slettedato.isNullOrEmpty()
-            }
+            .firstOrNull()
+            ?.let { it.slettedato.isNullOrEmpty() }
             ?: false
 
-    private suspend fun hentVirksomhet(orgnr: String): Virksomhet? =
+    private suspend fun hentVirksomhet(orgnr: String): List<Virksomhet> =
         try {
-            httpClient.get(correctedUrl + orgnr)
-                .body<Virksomhet>()
+            httpClient.get(correctedUrl + "organisasjonsnummer=$orgnr")
+                .body<Payload>()._embedded?.underenheter.orEmpty()
         } catch (e: ClientRequestException) {
             if (e.response.status == HttpStatusCode.NotFound) {
-                null
+                emptyList()
             } else {
                 throw e
             }
@@ -48,7 +51,18 @@ class BrregClient(
 }
 
 @Serializable
-internal data class Virksomhet(
+internal data class Payload(
+    val _embedded: VirksomhetListe? = null,
+)
+
+@Serializable
+internal data class VirksomhetListe(
+    val underenheter: List<Virksomhet>? = null,
+)
+
+@Serializable
+data class Virksomhet(
     val navn: String,
+    val organisasjonsnummer: String,
     val slettedato: String? = null,
 )
