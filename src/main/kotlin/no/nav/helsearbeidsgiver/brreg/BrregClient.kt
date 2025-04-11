@@ -34,7 +34,8 @@ class BrregClient(
     suspend fun erVirksomhet(orgnr: String): Boolean =
         hentVirksomhet(orgnr)
             .firstOrNull()
-            ?.let { it.slettedato.isNullOrEmpty() }
+            ?.slettedato
+            ?.isEmpty()
             ?: false
 
     private suspend fun hentVirksomhet(orgnr: String): List<Virksomhet> =
