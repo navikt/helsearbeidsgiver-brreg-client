@@ -50,7 +50,7 @@ dependencies {
     val slf4jVersion: String by project
     val utilsVersion: String by project
 
-    api("no.nav.helsearbeidsgiver:utils:${utilsVersion}")
+    api("no.nav.helsearbeidsgiver:utils:$utilsVersion")
 
     implementation("io.ktor:ktor-client-apache5:$ktorVersion")
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
