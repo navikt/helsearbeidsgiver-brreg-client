@@ -1,5 +1,3 @@
-@file:UseSerializers(LocalDateSerializer::class)
-
 package no.nav.helsearbeidsgiver.brreg
 
 import io.ktor.client.call.body
@@ -7,9 +5,7 @@ import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.request.get
 import io.ktor.http.HttpStatusCode
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.UseSerializers
 import no.nav.helsearbeidsgiver.utils.cache.LocalCache
-import no.nav.helsearbeidsgiver.utils.json.serializer.LocalDateSerializer
 import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 
 class BrregClient(
