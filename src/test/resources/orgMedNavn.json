@@ -1,0 +1,18 @@
+{
+  "_embedded": {
+    "underenheter": [
+      {
+        "organisasjonsnummer": "115232541",
+        "navn": "Kopper og krus AS"
+      },
+      {
+        "organisasjonsnummer": "609959703",
+        "navn": "Boller og brus AS"
+      },
+      {
+        "organisasjonsnummer": "530940357",
+        "navn": "Gråstein og grus AS"
+      }
+    ]
+  }
+}

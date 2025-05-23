@@ -1,3 +1,5 @@
+@file:UseSerializers(LocalDateSerializer::class)
+
 package no.nav.helsearbeidsgiver.brreg
 
 import io.ktor.client.call.body
@@ -5,63 +7,69 @@ import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.request.get
 import io.ktor.http.HttpStatusCode
 import kotlinx.serialization.Serializable
-import no.nav.helsearbeidsgiver.utils.log.logger
-
-internal const val VIRKSOMHET_NAVN_DEFAULT = "Ukjent arbeidsgiver"
+import kotlinx.serialization.UseSerializers
+import no.nav.helsearbeidsgiver.utils.cache.LocalCache
+import no.nav.helsearbeidsgiver.utils.json.serializer.LocalDateSerializer
+import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 
 class BrregClient(
     url: String,
+    cacheConfig: LocalCache.Config,
 ) {
-    private val logger = this.logger()
-
-    private val httpClient = createHttpClient()
     private val correctedUrl = url.trimEnd('/') + "?size=100&"
+    private val httpClient = createHttpClient()
+    private val cache = LocalCache<Organisasjon>(cacheConfig)
 
-    suspend fun hentVirksomheter(orgnr: List<String>): List<Virksomhet> {
-        return hentVirksomhet(orgnr.joinToString(separator = ","))
-    }
-
-    suspend fun hentVirksomhetNavn(orgnr: String): String? =
-        hentVirksomhet(orgnr).firstOrNull()
-            ?.navn
-
-    suspend fun hentVirksomhetNavnOrDefault(orgnr: String): String =
-        hentVirksomhetNavn(orgnr)
-            ?: VIRKSOMHET_NAVN_DEFAULT.also {
-                logger.error("Fant ikke virksomhet i brreg, bruker default navn '$it'.")
-            }
-
-    suspend fun erVirksomhet(orgnr: String): Boolean =
+    suspend fun hentOrganisasjonNavn(orgnr: Set<Orgnr>): Map<Orgnr, String> =
         hentVirksomhet(orgnr)
+            .mapKeys { Orgnr(it.key) }
+            .mapValues { it.value.navn }
+
+    suspend fun erOrganisasjon(orgnr: Orgnr): Boolean =
+        hentVirksomhet(setOf(orgnr))
+            .values
             .firstOrNull()
+            // Kompilatoren mener at 'let' er redundant. Den lyver.
             ?.let { it.slettedato.isNullOrEmpty() }
             ?: false
 
-    private suspend fun hentVirksomhet(orgnr: String): List<Virksomhet> =
-        try {
-            httpClient.get(correctedUrl + "organisasjonsnummer=$orgnr")
-                .body<Payload>()._embedded?.underenheter.orEmpty()
-        } catch (e: ClientRequestException) {
-            if (e.response.status == HttpStatusCode.NotFound) {
-                emptyList()
-            } else {
-                throw e
-            }
+    private suspend fun hentVirksomhet(orgnr: Set<Orgnr>): Map<String, Organisasjon> {
+        val orgnrSomStrenger = orgnr.map(Orgnr::verdi).toSet()
+
+        return cache.getOrPut(orgnrSomStrenger) {
+            val organisasjoner =
+                try {
+                    val orgnrKommaSeparert = orgnrSomStrenger.joinToString(separator = ",")
+                    httpClient.get(correctedUrl + "organisasjonsnummer=$orgnrKommaSeparert")
+                        .body<Respons>()
+                        ._embedded
+                        ?.underenheter
+                        .orEmpty()
+                } catch (e: ClientRequestException) {
+                    if (e.response.status == HttpStatusCode.NotFound) {
+                        emptyList()
+                    } else {
+                        throw e
+                    }
+                }
+
+            organisasjoner.associateBy { it.organisasjonsnummer }
         }
+    }
 }
 
 @Serializable
-internal data class Payload(
-    val _embedded: VirksomhetListe? = null,
+private data class Respons(
+    val _embedded: Organisasjoner? = null,
 )
 
 @Serializable
-internal data class VirksomhetListe(
-    val underenheter: List<Virksomhet>? = null,
+private data class Organisasjoner(
+    val underenheter: List<Organisasjon>? = null,
 )
 
 @Serializable
-data class Virksomhet(
+private data class Organisasjon(
     val navn: String,
     val organisasjonsnummer: String,
     val slettedato: String? = null,
