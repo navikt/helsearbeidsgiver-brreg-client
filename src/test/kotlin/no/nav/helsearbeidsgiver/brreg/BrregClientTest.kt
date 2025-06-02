@@ -1,118 +1,91 @@
 package no.nav.helsearbeidsgiver.brreg
 
 import io.kotest.assertions.throwables.shouldThrowExactly
-import io.kotest.core.spec.style.StringSpec
+import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
-import io.kotest.matchers.comparables.shouldBeEqualComparingTo
-import io.kotest.matchers.nulls.shouldBeNull
-import io.kotest.matchers.nulls.shouldNotBeNull
-import io.kotest.matchers.shouldBe
+import io.kotest.matchers.maps.shouldBeEmpty
+import io.kotest.matchers.maps.shouldContainExactly
 import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.plugins.ServerResponseException
 import io.ktor.http.HttpStatusCode
 import no.nav.helsearbeidsgiver.utils.test.resource.readResource
+import no.nav.helsearbeidsgiver.utils.test.wrapper.genererGyldig
+import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 
-private const val ORG_NR = "123456789"
+private val ORGNR_1 = Orgnr("115232541")
+private val ORGNR_2 = Orgnr("609959703")
+private val ORGNR_3 = Orgnr("530940357")
+private val ORGNR_SLETTET = Orgnr("419741485")
 
-private val virksomhetMedNavnJson = "virksomhetMedNavn.json".readResource()
-private val virksomhetSlettetJson = "virksomhetSlettet.json".readResource()
-private val virksomhetIkkeFunnetJson = "ingenTreff.json".readResource()
-private val flereTreffJson = "flereTreff.json".readResource()
+private val orgMedNavnJson = "orgMedNavn.json".readResource()
+private val orgSlettetJson = "orgSlettet.json".readResource()
 
-class BrregClientTest : StringSpec({
+class BrregClientTest : FunSpec({
 
-    "${BrregClient::hentVirksomhetNavn.name} skal finne virksomhetsnavn" {
-        val navn = mockBrregClient(HttpStatusCode.OK, virksomhetMedNavnJson)
-            .hentVirksomhetNavn(ORG_NR)
+    context(BrregClient::hentOrganisasjonNavn.name) {
+        test("henter organisasjonsnavn") {
+            val navnByOrgnr = mockBrregClient(HttpStatusCode.OK, orgMedNavnJson)
+                .hentOrganisasjonNavn(setOf(ORGNR_1, ORGNR_2, ORGNR_3))
 
-        navn.shouldNotBeNull()
-        navn shouldBeEqualComparingTo "Firma AS"
-    }
+            navnByOrgnr shouldContainExactly mapOf(
+                ORGNR_1 to "Kopper og krus AS",
+                ORGNR_2 to "Boller og brus AS",
+                ORGNR_3 to "Gråstein og grus AS",
+            )
+        }
 
-    // Skal ikke få 404 ved bruk av nytt kall, men beholder foreløpig
-    "${BrregClient::hentVirksomhetNavn.name} skal gi 'null' dersom vi mottar 'Not found' http-kode" {
-        mockBrregClient(HttpStatusCode.NotFound)
-            .hentVirksomhetNavn(ORG_NR)
-            .shouldBeNull()
-    }
+        // Skal ikke få 404 ved bruk av nytt kall, men beholder foreløpig
+        test("gir 'null' ved HTTP-status '404 Not Found'") {
+            mockBrregClient(HttpStatusCode.NotFound)
+                .hentOrganisasjonNavn(setOf(ORGNR_1, ORGNR_2, ORGNR_3))
+                .shouldBeEmpty()
+        }
 
-    "${BrregClient::hentVirksomhetNavnOrDefault.name} skal finne virksomhetsnavn" {
-        val navn = mockBrregClient(HttpStatusCode.OK, virksomhetMedNavnJson)
-            .hentVirksomhetNavnOrDefault(ORG_NR)
-
-        navn shouldBeEqualComparingTo "Firma AS"
-    }
-
-    // Skal ikke få 404 ved bruk av nytt kall, men beholder foreløpig
-    "${BrregClient::hentVirksomhetNavnOrDefault.name} skal gi default navn dersom vi mottar 'Not found' http-kode" {
-        val navn = mockBrregClient(HttpStatusCode.NotFound)
-            .hentVirksomhetNavnOrDefault(ORG_NR)
-
-        navn shouldBeEqualComparingTo VIRKSOMHET_NAVN_DEFAULT
-    }
-
-    "${BrregClient::hentVirksomhetNavn.name} skal gi default navn dersom virksomhet ikke finnes" {
-        val navn = mockBrregClient(HttpStatusCode.OK, virksomhetIkkeFunnetJson)
-            .hentVirksomhetNavnOrDefault(ORG_NR)
-        navn shouldBeEqualComparingTo VIRKSOMHET_NAVN_DEFAULT
-    }
-
-    "${BrregClient::hentVirksomhetNavn.name} skal gi 'null' dersom virksomhet ikke finnes" {
-        mockBrregClient(HttpStatusCode.OK, virksomhetIkkeFunnetJson)
-            .hentVirksomhetNavn(ORG_NR)
-            .shouldBeNull()
-    }
-
-    "funnet virksomhet uten slettedato bekrefter eksistens" {
-        mockBrregClient(HttpStatusCode.OK, virksomhetMedNavnJson)
-            .erVirksomhet(ORG_NR)
-            .shouldBeTrue()
-    }
-
-    "funnet virksomhet med slettedato avkrefter eksistens" {
-        mockBrregClient(HttpStatusCode.OK, virksomhetSlettetJson)
-            .erVirksomhet(ORG_NR)
-            .shouldBeFalse()
-    }
-
-    // Skal ikke få 404 ved bruk av nytt kall, men beholder foreløpig
-    "ikke funnet virksomhet avkrefter eksistens" {
-        mockBrregClient(HttpStatusCode.NotFound)
-            .erVirksomhet(ORG_NR)
-            .shouldBeFalse()
-    }
-
-    "hent flere virksomheter" {
-        val parametere = listOf("123456789", "012345678", "987654321")
-        val virksomheter = mockBrregClient(HttpStatusCode.OK, flereTreffJson).hentVirksomheter(parametere)
-        parametere.forEachIndexed { i, parameter ->
-            parameter shouldBe virksomheter[i].organisasjonsnummer
-            "Firma $i" shouldBe virksomheter[i].navn
+        test("gir 'null' dersom organisasjon ikke er tilstede i respons") {
+            mockBrregClient(HttpStatusCode.OK, "{}")
+                .hentOrganisasjonNavn(setOf(ORGNR_1, ORGNR_2, ORGNR_3))
+                .shouldBeEmpty()
         }
     }
 
-    listOf(
-        BrregClient::hentVirksomhetNavn,
-        BrregClient::hentVirksomhetNavnOrDefault,
-        BrregClient::erVirksomhet,
-    )
-        .forEach { testFn ->
-            "${testFn.name} skal feile ved 4xx-feil utenom 404" {
-                shouldThrowExactly<ClientRequestException> {
-                    testFn(
-                        mockBrregClient(HttpStatusCode.BadRequest),
-                        ORG_NR,
-                    )
-                }
-            }
+    context(BrregClient::erOrganisasjon.name) {
+        test("organisasjon uten slettedato bekrefter eksistens") {
+            mockBrregClient(HttpStatusCode.OK, orgMedNavnJson)
+                .erOrganisasjon(ORGNR_3)
+                .shouldBeTrue()
+        }
 
-            "${testFn.name} skal feile ved 5xx-feil" {
-                shouldThrowExactly<ServerResponseException> {
-                    testFn(
-                        mockBrregClient(HttpStatusCode.InternalServerError),
-                        ORG_NR,
-                    )
+        test("organisasjon med slettedato avkrefter eksistens") {
+            mockBrregClient(HttpStatusCode.OK, orgSlettetJson)
+                .erOrganisasjon(ORGNR_SLETTET)
+                .shouldBeFalse()
+        }
+
+        // Skal ikke få 404 ved bruk av nytt kall, men beholder foreløpig
+        test("organisasjon avkreftes eksistens ved HTTP-status '404 Not Found'") {
+            mockBrregClient(HttpStatusCode.NotFound)
+                .erOrganisasjon(ORGNR_3)
+                .shouldBeFalse()
+        }
+    }
+
+    listOf<Pair<String, suspend BrregClient.() -> Unit>>(
+        BrregClient::hentOrganisasjonNavn.name to { hentOrganisasjonNavn(setOf(Orgnr.genererGyldig(), Orgnr.genererGyldig())) },
+        BrregClient::erOrganisasjon.name to { erOrganisasjon(Orgnr.genererGyldig()) },
+    )
+        .forEach { (testFnName, testFn) ->
+            context(testFnName) {
+                test("skal feile ved 4xx-feil utenom 404") {
+                    shouldThrowExactly<ClientRequestException> {
+                        mockBrregClient(HttpStatusCode.BadRequest).testFn()
+                    }
+                }
+
+                test("skal feile ved 5xx-feil") {
+                    shouldThrowExactly<ServerResponseException> {
+                        mockBrregClient(HttpStatusCode.InternalServerError).testFn()
+                    }
                 }
             }
         }

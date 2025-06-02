@@ -8,7 +8,9 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import io.mockk.every
+import no.nav.helsearbeidsgiver.utils.cache.LocalCache
 import no.nav.helsearbeidsgiver.utils.test.mock.mockStatic
+import kotlin.time.Duration
 
 fun mockBrregClient(
     status: HttpStatusCode,
@@ -26,6 +28,9 @@ fun mockBrregClient(
 
     return mockStatic(::createHttpClient) {
         every { createHttpClient() } returns mockHttpClient
-        BrregClient("url")
+        BrregClient(
+            url = "url",
+            cacheConfig = LocalCache.Config(Duration.ZERO, 1),
+        )
     }
 }
