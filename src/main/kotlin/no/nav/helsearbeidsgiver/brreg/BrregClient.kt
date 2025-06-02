@@ -17,19 +17,19 @@ class BrregClient(
     private val cache = LocalCache<Organisasjon>(cacheConfig)
 
     suspend fun hentOrganisasjonNavn(orgnr: Set<Orgnr>): Map<Orgnr, String> =
-        hentVirksomhet(orgnr)
+        hentOrganisasjoner(orgnr)
             .mapKeys { Orgnr(it.key) }
             .mapValues { it.value.navn }
 
     suspend fun erOrganisasjon(orgnr: Orgnr): Boolean =
-        hentVirksomhet(setOf(orgnr))
+        hentOrganisasjoner(setOf(orgnr))
             .values
             .firstOrNull()
             // Kompilatoren mener at 'let' er redundant. Den lyver.
             ?.let { it.slettedato.isNullOrEmpty() }
             ?: false
 
-    private suspend fun hentVirksomhet(orgnr: Set<Orgnr>): Map<String, Organisasjon> {
+    private suspend fun hentOrganisasjoner(orgnr: Set<Orgnr>): Map<String, Organisasjon> {
         val orgnrSomStrenger = orgnr.map(Orgnr::verdi).toSet()
 
         return cache.getOrPut(orgnrSomStrenger) {
