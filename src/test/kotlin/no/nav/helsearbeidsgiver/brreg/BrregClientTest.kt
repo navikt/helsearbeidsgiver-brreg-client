@@ -1,5 +1,6 @@
 package no.nav.helsearbeidsgiver.brreg
 
+import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.booleans.shouldBeFalse
@@ -10,7 +11,6 @@ import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.plugins.ServerResponseException
 import io.ktor.http.HttpStatusCode
 import no.nav.helsearbeidsgiver.utils.test.resource.readResource
-import no.nav.helsearbeidsgiver.utils.test.wrapper.genererGyldig
 import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 
 private val ORGNR_1 = Orgnr("115232541")
@@ -25,7 +25,7 @@ class BrregClientTest : FunSpec({
 
     context(BrregClient::hentOrganisasjonNavn.name) {
         test("henter organisasjonsnavn") {
-            val navnByOrgnr = mockBrregClient(HttpStatusCode.OK, orgMedNavnJson)
+            val navnByOrgnr = mockBrregClient(HttpStatusCode.OK to orgMedNavnJson)
                 .hentOrganisasjonNavn(setOf(ORGNR_1, ORGNR_2, ORGNR_3))
 
             navnByOrgnr shouldContainExactly mapOf(
@@ -37,13 +37,13 @@ class BrregClientTest : FunSpec({
 
         // Skal ikke få 404 ved bruk av nytt kall, men beholder foreløpig
         test("gir 'null' ved HTTP-status '404 Not Found'") {
-            mockBrregClient(HttpStatusCode.NotFound)
+            mockBrregClient(HttpStatusCode.NotFound to "")
                 .hentOrganisasjonNavn(setOf(ORGNR_1, ORGNR_2, ORGNR_3))
                 .shouldBeEmpty()
         }
 
         test("gir 'null' dersom organisasjon ikke er tilstede i respons") {
-            mockBrregClient(HttpStatusCode.OK, "{}")
+            mockBrregClient(HttpStatusCode.OK to "{}")
                 .hentOrganisasjonNavn(setOf(ORGNR_1, ORGNR_2, ORGNR_3))
                 .shouldBeEmpty()
         }
@@ -51,40 +51,73 @@ class BrregClientTest : FunSpec({
 
     context(BrregClient::erOrganisasjon.name) {
         test("organisasjon uten slettedato bekrefter eksistens") {
-            mockBrregClient(HttpStatusCode.OK, orgMedNavnJson)
+            mockBrregClient(HttpStatusCode.OK to orgMedNavnJson)
                 .erOrganisasjon(ORGNR_3)
                 .shouldBeTrue()
         }
 
         test("organisasjon med slettedato avkrefter eksistens") {
-            mockBrregClient(HttpStatusCode.OK, orgSlettetJson)
+            mockBrregClient(HttpStatusCode.OK to orgSlettetJson)
                 .erOrganisasjon(ORGNR_SLETTET)
                 .shouldBeFalse()
         }
 
         // Skal ikke få 404 ved bruk av nytt kall, men beholder foreløpig
         test("organisasjon avkreftes eksistens ved HTTP-status '404 Not Found'") {
-            mockBrregClient(HttpStatusCode.NotFound)
+            mockBrregClient(HttpStatusCode.NotFound to "")
                 .erOrganisasjon(ORGNR_3)
                 .shouldBeFalse()
         }
     }
 
     listOf<Pair<String, suspend BrregClient.() -> Unit>>(
-        BrregClient::hentOrganisasjonNavn.name to { hentOrganisasjonNavn(setOf(Orgnr.genererGyldig(), Orgnr.genererGyldig())) },
-        BrregClient::erOrganisasjon.name to { erOrganisasjon(Orgnr.genererGyldig()) },
+        BrregClient::hentOrganisasjonNavn.name to { hentOrganisasjonNavn(setOf(ORGNR_1, ORGNR_2, ORGNR_3)) },
+        BrregClient::erOrganisasjon.name to { erOrganisasjon(ORGNR_3) },
     )
         .forEach { (testFnName, testFn) ->
             context(testFnName) {
-                test("skal feile ved 4xx-feil utenom 404") {
+                test("feiler ved 4xx-feil utenom 404") {
                     shouldThrowExactly<ClientRequestException> {
-                        mockBrregClient(HttpStatusCode.BadRequest).testFn()
+                        mockBrregClient(HttpStatusCode.BadRequest to "").testFn()
                     }
                 }
 
-                test("skal feile ved 5xx-feil") {
+                test("lykkes ved færre 5xx-feil enn max retries (5)") {
+                    shouldNotThrowAny {
+                        mockBrregClient(
+                            HttpStatusCode.InternalServerError to "",
+                            HttpStatusCode.InternalServerError to "",
+                            HttpStatusCode.InternalServerError to "",
+                            HttpStatusCode.InternalServerError to "",
+                            HttpStatusCode.InternalServerError to "",
+                            HttpStatusCode.OK to orgMedNavnJson,
+                        ).testFn()
+                    }
+                }
+
+                test("feiler ved flere 5xx-feil enn max retries (5)") {
                     shouldThrowExactly<ServerResponseException> {
-                        mockBrregClient(HttpStatusCode.InternalServerError).testFn()
+                        mockBrregClient(
+                            HttpStatusCode.InternalServerError to "",
+                            HttpStatusCode.InternalServerError to "",
+                            HttpStatusCode.InternalServerError to "",
+                            HttpStatusCode.InternalServerError to "",
+                            HttpStatusCode.InternalServerError to "",
+                            HttpStatusCode.InternalServerError to "",
+                        ).testFn()
+                    }
+                }
+
+                test("kall feiler og prøver på nytt ved timeout") {
+                    shouldNotThrowAny {
+                        mockBrregClient(
+                            HttpStatusCode.OK to "timeout",
+                            HttpStatusCode.OK to "timeout",
+                            HttpStatusCode.OK to "timeout",
+                            HttpStatusCode.OK to "timeout",
+                            HttpStatusCode.OK to "timeout",
+                            HttpStatusCode.OK to orgMedNavnJson,
+                        ).testFn()
                     }
                 }
             }
