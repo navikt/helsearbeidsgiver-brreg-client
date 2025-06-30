@@ -5,7 +5,6 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
-import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
@@ -37,18 +36,7 @@ fun mockBrregClient(vararg responses: Pair<HttpStatusCode, String>): BrregClient
         )
     }
 
-    val mockHttpClient = HttpClient(mockEngine) {
-        customize()
-
-        // Overstyr delay for å unngå at testene bruker lang tid
-        install(HttpRequestRetry) {
-            customizeRetry()
-            constantDelay(
-                millis = 1,
-                randomizationMs = 1,
-            )
-        }
-    }
+    val mockHttpClient = HttpClient(mockEngine) { configure() }
 
     return mockStatic(::createHttpClient) {
         every { createHttpClient() } returns mockHttpClient

@@ -7,9 +7,11 @@ import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.maps.shouldBeEmpty
 import io.kotest.matchers.maps.shouldContainExactly
+import io.kotest.matchers.shouldBe
 import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.plugins.ServerResponseException
 import io.ktor.http.HttpStatusCode
+import kotlinx.coroutines.test.runTest
 import no.nav.helsearbeidsgiver.utils.test.resource.readResource
 import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 
@@ -77,13 +79,17 @@ class BrregClientTest : FunSpec({
         .forEach { (testFnName, testFn) ->
             context(testFnName) {
                 test("feiler ved 4xx-feil utenom 404") {
-                    shouldThrowExactly<ClientRequestException> {
-                        mockBrregClient(HttpStatusCode.BadRequest to "").testFn()
+                    val mockBrregClient = mockBrregClient(HttpStatusCode.BadRequest to "")
+
+                    val e = shouldThrowExactly<ClientRequestException> {
+                        mockBrregClient.testFn()
                     }
+
+                    e.response.status shouldBe HttpStatusCode.BadRequest
                 }
 
                 test("lykkes ved færre 5xx-feil enn max retries (5)") {
-                    shouldNotThrowAny {
+                    val mockBrregClient =
                         mockBrregClient(
                             HttpStatusCode.InternalServerError to "",
                             HttpStatusCode.InternalServerError to "",
@@ -91,12 +97,17 @@ class BrregClientTest : FunSpec({
                             HttpStatusCode.InternalServerError to "",
                             HttpStatusCode.InternalServerError to "",
                             HttpStatusCode.OK to orgMedNavnJson,
-                        ).testFn()
+                        )
+
+                    runTest {
+                        shouldNotThrowAny {
+                            mockBrregClient.testFn()
+                        }
                     }
                 }
 
                 test("feiler ved flere 5xx-feil enn max retries (5)") {
-                    shouldThrowExactly<ServerResponseException> {
+                    val mockBrregClient =
                         mockBrregClient(
                             HttpStatusCode.InternalServerError to "",
                             HttpStatusCode.InternalServerError to "",
@@ -104,12 +115,19 @@ class BrregClientTest : FunSpec({
                             HttpStatusCode.InternalServerError to "",
                             HttpStatusCode.InternalServerError to "",
                             HttpStatusCode.InternalServerError to "",
-                        ).testFn()
+                        )
+
+                    runTest {
+                        val e = shouldThrowExactly<ServerResponseException> {
+                            mockBrregClient.testFn()
+                        }
+
+                        e.response.status shouldBe HttpStatusCode.InternalServerError
                     }
                 }
 
                 test("kall feiler og prøver på nytt ved timeout") {
-                    shouldNotThrowAny {
+                    val mockBrregClient =
                         mockBrregClient(
                             HttpStatusCode.OK to "timeout",
                             HttpStatusCode.OK to "timeout",
@@ -117,7 +135,12 @@ class BrregClientTest : FunSpec({
                             HttpStatusCode.OK to "timeout",
                             HttpStatusCode.OK to "timeout",
                             HttpStatusCode.OK to orgMedNavnJson,
-                        ).testFn()
+                        )
+
+                    runTest {
+                        shouldNotThrowAny {
+                            mockBrregClient.testFn()
+                        }
                     }
                 }
             }

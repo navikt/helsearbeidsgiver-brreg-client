@@ -44,7 +44,8 @@ publishing {
 
 dependencies {
     val kotestVersion: String by project
-    val kotlinSerializationVersion: String by project
+    val kotlinxCoroutinesVersion: String by project
+    val kotlinxSerializationVersion: String by project
     val ktorVersion: String by project
     val mockkVersion: String by project
     val slf4jVersion: String by project
@@ -56,7 +57,7 @@ dependencies {
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-client-core:$ktorVersion")
     implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinSerializationVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinxSerializationVersion")
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
 
     testImplementation(testFixtures("no.nav.helsearbeidsgiver:utils:$utilsVersion"))
@@ -64,6 +65,7 @@ dependencies {
     testImplementation("io.kotest:kotest-runner-junit5:$kotestVersion")
     testImplementation("io.ktor:ktor-client-mock:$ktorVersion")
     testImplementation("io.mockk:mockk:$mockkVersion")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinxCoroutinesVersion")
 }
 
 fun RepositoryHandler.mavenNav(repo: String): MavenArtifactRepository {
