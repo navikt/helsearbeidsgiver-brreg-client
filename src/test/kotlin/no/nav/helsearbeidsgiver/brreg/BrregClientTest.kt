@@ -15,10 +15,10 @@ import kotlinx.coroutines.test.runTest
 import no.nav.helsearbeidsgiver.utils.test.resource.readResource
 import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 
-private val ORGNR_1 = Orgnr("115232541")
-private val ORGNR_2 = Orgnr("609959703")
-private val ORGNR_3 = Orgnr("530940357")
-private val ORGNR_SLETTET = Orgnr("419741485")
+private val ORGNR_1 = "115232541"
+private val ORGNR_2 = "609959703"
+private val ORGNR_3 = "530940357"
+private val ORGNR_SLETTET = "419741485"
 
 private val orgMedNavnJson = "orgMedNavn.json".readResource()
 private val orgSlettetJson = "orgSlettet.json".readResource()
@@ -31,9 +31,9 @@ class BrregClientTest : FunSpec({
                 .hentOrganisasjonNavn(setOf(ORGNR_1, ORGNR_2, ORGNR_3))
 
             navnByOrgnr shouldContainExactly mapOf(
-                ORGNR_1 to "Kopper og krus AS",
-                ORGNR_2 to "Boller og brus AS",
-                ORGNR_3 to "Gråstein og grus AS",
+                Orgnr(ORGNR_1) to "Kopper og krus AS",
+                Orgnr(ORGNR_2) to "Boller og brus AS",
+                Orgnr(ORGNR_3) to "Gråstein og grus AS",
             )
         }
 
