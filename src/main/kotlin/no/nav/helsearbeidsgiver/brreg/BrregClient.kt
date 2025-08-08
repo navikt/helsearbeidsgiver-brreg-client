@@ -16,12 +16,12 @@ class BrregClient(
     private val httpClient = createHttpClient()
     private val cache = LocalCache<Organisasjon>(cacheConfig)
 
-    suspend fun hentOrganisasjonNavn(orgnr: Set<Orgnr>): Map<Orgnr, String> =
+    suspend fun hentOrganisasjonNavn(orgnr: Set<String>): Map<Orgnr, String> =
         hentOrganisasjoner(orgnr)
             .mapKeys { Orgnr(it.key) }
             .mapValues { it.value.navn }
 
-    suspend fun erOrganisasjon(orgnr: Orgnr): Boolean =
+    suspend fun erOrganisasjon(orgnr: String): Boolean =
         hentOrganisasjoner(setOf(orgnr))
             .values
             .firstOrNull()
@@ -29,13 +29,11 @@ class BrregClient(
             ?.let { it.slettedato.isNullOrEmpty() }
             ?: false
 
-    private suspend fun hentOrganisasjoner(orgnr: Set<Orgnr>): Map<String, Organisasjon> {
-        val orgnrSomStrenger = orgnr.map(Orgnr::verdi).toSet()
-
-        return cache.getOrPut(orgnrSomStrenger) {
+    private suspend fun hentOrganisasjoner(orgnr: Set<String>): Map<String, Organisasjon> =
+        cache.getOrPut(orgnr) {
             val organisasjoner =
                 try {
-                    val orgnrKommaSeparert = orgnrSomStrenger.joinToString(separator = ",")
+                    val orgnrKommaSeparert = orgnr.joinToString(separator = ",")
                     httpClient.get(correctedUrl + "organisasjonsnummer=$orgnrKommaSeparert")
                         .body<Respons>()
                         ._embedded
@@ -51,7 +49,6 @@ class BrregClient(
 
             organisasjoner.associateBy { it.organisasjonsnummer }
         }
-    }
 }
 
 @Serializable
