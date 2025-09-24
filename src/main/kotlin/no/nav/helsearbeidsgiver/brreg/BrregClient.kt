@@ -34,7 +34,8 @@ class BrregClient(
             val organisasjoner =
                 try {
                     val orgnrKommaSeparert = orgnr.joinToString(separator = ",")
-                    httpClient.get(correctedUrl + "organisasjonsnummer=$orgnrKommaSeparert")
+                    httpClient
+                        .get(correctedUrl + "organisasjonsnummer=$orgnrKommaSeparert")
                         .body<Respons>()
                         ._embedded
                         ?.underenheter

@@ -6,11 +6,10 @@ jobs:
   Ktlint:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out repository code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
       - name: "Install ktlint"
         uses: nbadal/action-ktlint-setup@v1
         with:
-          ktlint_version: '0.50.0'
+          ktlint_version: '1.6.0'
       - run: ktlint
         shell: bash
