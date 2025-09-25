@@ -8,5 +8,7 @@ on:
 jobs:
   build_and_publish:
     uses: navikt/hag-workflows/.github/workflows/build_with_publish.yml@main
+    permissions:
+      packages: write
     with:
       publish: true
