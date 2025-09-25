@@ -21,6 +21,10 @@ tasks {
     test {
         useJUnitPlatform()
     }
+
+    register("printVersion") {
+        println(project.version)
+    }
 }
 
 java {
