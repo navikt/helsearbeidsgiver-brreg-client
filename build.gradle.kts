@@ -1,8 +1,5 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
-group = "no.nav.helsearbeidsgiver"
-version = "0.8.1"
-
 plugins {
     kotlin("jvm")
     kotlin("plugin.serialization")
@@ -23,7 +20,9 @@ tasks {
     }
 
     register("printVersion") {
-        print(project.version)
+        doLast {
+            print(project.version)
+        }
     }
 }
 
