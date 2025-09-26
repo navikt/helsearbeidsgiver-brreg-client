@@ -23,7 +23,7 @@ tasks {
     }
 
     register("printVersion") {
-        println(project.version)
+        print(project.version)
     }
 }
 
