@@ -38,6 +38,9 @@ repositories {
 publishing {
     publications {
         create<MavenPublication>("mavenJava") {
+            groupId = project.group.toString()
+            version = project.version.toString()
+
             from(components["java"])
         }
     }
