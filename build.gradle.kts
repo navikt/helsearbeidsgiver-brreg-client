@@ -1,8 +1,5 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
-group = "no.nav.helsearbeidsgiver"
-version = "0.8.0"
-
 plugins {
     kotlin("jvm")
     kotlin("plugin.serialization")
