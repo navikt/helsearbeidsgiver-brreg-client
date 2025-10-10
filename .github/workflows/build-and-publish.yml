@@ -6,7 +6,7 @@ on:
       - '**'
 
 jobs:
-  build_and_publish:
-    uses: navikt/hag-workflows/.github/workflows/build_and_publish.yml@main
+  build-and-publish:
+    uses: navikt/hag-workflows/.github/workflows/build-and-publish.yml@main
     permissions:
       packages: write
