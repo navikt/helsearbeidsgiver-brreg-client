@@ -37,13 +37,13 @@ publishing {
 }
 
 dependencies {
-    val kotestVersion: String by project
-    val kotlinxCoroutinesVersion: String by project
-    val kotlinxSerializationVersion: String by project
-    val ktorVersion: String by project
-    val mockkVersion: String by project
-    val slf4jVersion: String by project
-    val utilsVersion: String by project
+    val kotestVersion = project.property("kotestVersion") as String
+    val kotlinxCoroutinesVersion = project.property("kotlinxCoroutinesVersion") as String
+    val kotlinxSerializationVersion = project.property("kotlinxSerializationVersion") as String
+    val ktorVersion = project.property("ktorVersion") as String
+    val mockkVersion = project.property("mockkVersion") as String
+    val slf4jVersion = project.property("slf4jVersion") as String
+    val utilsVersion = project.property("utilsVersion") as String
 
     api("no.nav.helsearbeidsgiver:utils:$utilsVersion")
 
@@ -65,7 +65,7 @@ dependencies {
 }
 
 fun RepositoryHandler.mavenNav(repo: String): MavenArtifactRepository {
-    val githubPassword: String by project
+    val githubPassword = project.property("githubPassword") as String
 
     return maven {
         setUrl("https://maven.pkg.github.com/navikt/$repo")
