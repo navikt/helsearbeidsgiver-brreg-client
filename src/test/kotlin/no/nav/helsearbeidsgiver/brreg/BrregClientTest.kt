@@ -3,6 +3,7 @@ package no.nav.helsearbeidsgiver.brreg
 import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FunSpec
+import io.kotest.core.test.testCoroutineScheduler
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.maps.shouldBeEmpty
@@ -11,14 +12,13 @@ import io.kotest.matchers.shouldBe
 import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.plugins.ServerResponseException
 import io.ktor.http.HttpStatusCode
-import kotlinx.coroutines.test.runTest
 import no.nav.helsearbeidsgiver.utils.test.resource.readResource
 import no.nav.helsearbeidsgiver.utils.wrapper.Orgnr
 
-private val ORGNR_1 = "115232541"
-private val ORGNR_2 = "609959703"
-private val ORGNR_3 = "530940357"
-private val ORGNR_SLETTET = "419741485"
+private const val ORGNR_1 = "115232541"
+private const val ORGNR_2 = "609959703"
+private const val ORGNR_3 = "530940357"
+private const val ORGNR_SLETTET = "419741485"
 
 private val orgMedNavnJson = "orgMedNavn.json".readResource()
 private val orgSlettetJson = "orgSlettet.json".readResource()
@@ -80,6 +80,9 @@ class BrregClientTest :
             BrregClient::erOrganisasjon.name to { erOrganisasjon(ORGNR_3) },
         ).forEach { (testFnName, testFn) ->
             context(testFnName) {
+                // Unngår venting på delay-funksjonen
+                coroutineTestScope = true
+
                 test("feiler ved 4xx-feil utenom 404") {
                     val mockBrregClient = mockBrregClient(HttpStatusCode.BadRequest to "")
 
@@ -102,10 +105,8 @@ class BrregClientTest :
                             HttpStatusCode.OK to orgMedNavnJson,
                         )
 
-                    runTest {
-                        shouldNotThrowAny {
-                            mockBrregClient.testFn()
-                        }
+                    shouldNotThrowAny {
+                        mockBrregClient.testFn()
                     }
                 }
 
@@ -120,14 +121,12 @@ class BrregClientTest :
                             HttpStatusCode.InternalServerError to "",
                         )
 
-                    runTest {
-                        val e =
-                            shouldThrowExactly<ServerResponseException> {
-                                mockBrregClient.testFn()
-                            }
+                    val e =
+                        shouldThrowExactly<ServerResponseException> {
+                            mockBrregClient.testFn()
+                        }
 
-                        e.response.status shouldBe HttpStatusCode.InternalServerError
-                    }
+                    e.response.status shouldBe HttpStatusCode.InternalServerError
                 }
 
                 test("kall feiler og prøver på nytt ved timeout") {
@@ -139,12 +138,11 @@ class BrregClientTest :
                             HttpStatusCode.OK to "timeout",
                             HttpStatusCode.OK to "timeout",
                             HttpStatusCode.OK to orgMedNavnJson,
+                            scheduler = testCoroutineScheduler,
                         )
 
-                    runTest {
-                        shouldNotThrowAny {
-                            mockBrregClient.testFn()
-                        }
+                    shouldNotThrowAny {
+                        mockBrregClient.testFn()
                     }
                 }
             }
