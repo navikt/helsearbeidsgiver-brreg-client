@@ -1,9 +1,9 @@
 rootProject.name = "brreg-client"
 
 pluginManagement {
-    val kotestVersion: String by settings
-    val kotlinVersion: String by settings
-    val kotlinterVersion: String by settings
+    val kotestVersion = providers.gradleProperty("kotestVersion").get()
+    val kotlinVersion = providers.gradleProperty("kotlinVersion").get()
+    val kotlinterVersion = providers.gradleProperty("kotlinterVersion").get()
 
     plugins {
         kotlin("jvm") version kotlinVersion
