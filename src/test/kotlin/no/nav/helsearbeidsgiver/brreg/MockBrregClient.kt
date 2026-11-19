@@ -9,19 +9,29 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import io.mockk.every
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestCoroutineScheduler
 import no.nav.helsearbeidsgiver.utils.cache.LocalCache
 import no.nav.helsearbeidsgiver.utils.test.mock.mockStatic
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 
-fun mockBrregClient(vararg responses: Pair<HttpStatusCode, String>): BrregClient {
+fun mockBrregClient(
+    vararg responses: Pair<HttpStatusCode, String>,
+    scheduler: TestCoroutineScheduler? = null,
+): BrregClient {
     val mockEngine =
         MockEngine.create {
+            if (scheduler != null) {
+                // Unngår venting på delay-funksjon kalt i request handler
+                dispatcher = StandardTestDispatcher(scheduler)
+            }
             reuseHandlers = false
             requestHandlers.addAll(
                 responses.map { (status, content) ->
                     {
                         if (content == "timeout") {
-                            delay(600)
+                            delay(600.milliseconds)
                         }
                         respond(
                             content = content,
